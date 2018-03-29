@@ -9,6 +9,8 @@ class NovalSpider(scrapy.Spider):
         'https://ck101.com/forum.php?gid=1180',
     ]
 
+    DEPTH = 3
+
     def parse(self, response):
         for novel_type in response.css("div.fl_dl"):
             next_url = novel_type.css("h2 a::attr(href)").extract_first()
@@ -16,6 +18,12 @@ class NovalSpider(scrapy.Spider):
              
             
     def novelparse(self, response):
+        page = response.url.split("page=")
+        if len(page) > 1:
+            page = int(page[1])
+        else:
+            page = 1
+        
         novel_type = response.css("div.xs2 a::attr(title)").extract_first()
         for novel in response.xpath("//tbody[contains(@id,'normalthread')]"):
             item = NovelItem()
@@ -26,3 +34,7 @@ class NovalSpider(scrapy.Spider):
             item['url'] = novel.css("div.blockTitle a::attr(href)").extract_first()
             yield item
 
+        next_page = response.css("a.nxt::attr(href)").extract_first()
+        if next_page is not None:
+            if page <= NovalSpider.DEPTH:
+                yield response.follow(next_page, self.novelparse)
