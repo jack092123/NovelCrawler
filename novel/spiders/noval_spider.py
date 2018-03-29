@@ -29,9 +29,9 @@ class NovalSpider(scrapy.Spider):
             item = NovelItem()
             item['novel_type'] = novel_type
             item['name'] = novel.css("div.blockTitle a::attr(title)").extract_first()
-            item['image'] = novel.css("div.l_sPic a::attr(href)").extract_first()
+            item['image'] = novel.css("div.l_sPic a img::attr(src)").extract_first()
             item['time'] = novel.css("div.postInfo span span::text").extract_first()
-            item['url'] = novel.css("div.blockTitle a::attr(href)").extract_first()
+            item['url'] = novel.css("div.l_sPic a::attr(href)").extract_first()
             yield item
 
         next_page = response.css("a.nxt::attr(href)").extract_first()
